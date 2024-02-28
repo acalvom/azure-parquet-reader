@@ -20,22 +20,14 @@ async function main() {
     );
 
     const containerClient = blobServiceClient.getContainerClient(process.env.AZURE_CONTAINER_NAME);
-    console.log("\n----> Listing blobs...");
 
-    // List the blob(s) in the container.
-    const blobs = [];
     for await (const blob of containerClient.listBlobsFlat()) {
-      // Get Blob Client from name, to get the URL
-      const tempBlockBlobClient = containerClient.getBlockBlobClient(blob.name);
-      blobs.push(tempBlockBlobClient);
-      console.log(`\n\tname: ${blob.name}\n\tURL: ${tempBlockBlobClient.url}\n`);
-    }
-    for (const blob of blobs) {
+      const blockBlobClient = containerClient.getBlockBlobClient(blob.name);
       if (blob.name.includes(".parquet")) {
         await verifyDirectory(`${__dirname}/parquets/${blob.name}`);
-        await blob.downloadToFile(`${__dirname}/parquets/${blob.name}`);
-        console.log("\n\t🔺️ Saved blob content...", blob.name);
-
+        console.log(`\n🔸 Name: ${blob.name}\tURL: ${blockBlobClient.url}`);
+        await blockBlobClient.downloadToFile(`${__dirname}/parquets/${blob.name}`);
+        console.log("\n\t🔺️ Saved parquet content...", blob.name);
         await paquetFileToDBTable(`${__dirname}/parquets/${blob.name}`);
       }
     }
