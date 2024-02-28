@@ -15,3 +15,7 @@ pnpm-debug.log*
 .DS_Store
 
 .vscode/
+
+# parquet files
+parquets/
+*.parquet
